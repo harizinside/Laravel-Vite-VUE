@@ -18,10 +18,22 @@ use Inertia\Inertia;
 //     return view('welcome');
 // });
 
+Route::middleware('auth:sanctum')->group( function () {
+
+});
+
 Route::get('/', function () {
     return Inertia::render('Home', ['test' => 'working']);
 });
 
 Route::get('/about-us', function () {
     return Inertia::render('About', ['about_us' => 'working']);
+});
+
+Route::get('/auth', function () {
+    return Inertia::render('Login', ['login' => 'working']);
+});
+
+Route::get('/home', function () {
+    return Inertia::render('Dashboard', ['dashboard' => 'working']);
 });
