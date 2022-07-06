@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth as Authz;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
 
 
@@ -28,23 +30,13 @@ class Auth extends Controller
      */
     public function check(Request $request)
     {
-        if(Authz::attempt(['email' => $request->email, 'password' => $request->password])){
+        if (Authz::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Authz::user();
-            $success['token'] =  $user->createToken('MyApp')->plainTextToken;
-            $success['name'] =  $user->name;
-
-            return response()->json([
-                'status' => true,
-                'date' => date('d-m-Y H:i:s'),
-                'data' => $success
-            ], 200);
-        }
-        else{
-            return response()->json([
-                'status' => true,
-                'date' => date('d-m-Y H:i:s'),
-                'data' => 'Unauthorised'
-            ], 401);
+            return Redirect::route('home')
+                ->with('message', 'Hallo');
+        } else {
+            return Redirect::route('login')
+                ->with('message', 'Your mail and password is not match!');
         }
     }
 
@@ -54,9 +46,11 @@ class Auth extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function register()
     {
-        //
+        return Inertia::render('Register', [
+            'title' => 'Register'
+        ]);
     }
 
     /**
@@ -66,9 +60,26 @@ class Auth extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name'   => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required',
+            'repassword' => 'required|same:password'
+        ]);
+
+        $post = User::create([
+            'name'     => $request->name,
+            'email'   => $request->email,
+            'password'   => bcrypt($request->password)
+        ]);
+
+        if ($post) {
+            Authz::login($post);
+            return Redirect::route('home')
+                ->with('message', 'Hallo');
+        }
     }
 
     /**
@@ -77,8 +88,24 @@ class Auth extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function logout()
     {
-        //
+        Authz::logout();
+        Session::flush();
+        return redirect('/auth');
+    }
+
+    public function recovery()
+    {
+        return Inertia::render('Recovery', [
+            'title' => 'Recovery'
+        ]);
+    }
+
+    public function reset_password(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
     }
 }

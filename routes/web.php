@@ -15,8 +15,15 @@ use App\Http\Controllers\Home;
 |
 */
 
-Route::get('/auth', [Auth::class, 'index']);
+Route::get('/auth', [Auth::class, 'index'])->name('login');
+Route::get('/auth/register', [Auth::class, 'register']);
+Route::get('/auth/logout', [Auth::class, 'logout']);
+Route::get('/auth/recovery', [Auth::class, 'recovery']);
 
-Route::middleware('auth:sanctum')->group( function () {
-    Route::get('/home', [Home::class, 'index']);
+Route::post('/auth/login', [Auth::class, 'check']);
+Route::post('/auth/register', [Auth::class, 'store']);
+Route::post('/auth/recovery', [Auth::class, 'reset_password']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/home', [Home::class, 'index'])->name('home');
 });
