@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Recovery;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth as Authz;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 
@@ -107,5 +109,8 @@ class Auth extends Controller
         $request->validate([
             'email' => 'required|email'
         ]);
+
+        $result = User::where('email', '=', $request->email)->first();
+        Mail::to($request->email)->send(new Recovery($result));
     }
 }
